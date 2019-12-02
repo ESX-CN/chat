@@ -2,6 +2,7 @@ local chatInputActive = false
 local chatInputActivating = false
 local chatHidden = true
 local chatLoaded = false
+local hideChat = true
 
 RegisterNetEvent('chatMessage')
 RegisterNetEvent('chat:addTemplate')
@@ -212,21 +213,38 @@ Citizen.CreateThread(function()
       end
     end
 
-    if chatLoaded then
-      local shouldBeHidden = false
+    if hideChat == true then
+      SendNUIMessage({
+        type = 'ON_SCREEN_STATE_CHANGE',
+        shouldHide = hideChat
+      })
+    else  
+      if chatLoaded then
+        local shouldBeHidden = false
 
-      if IsScreenFadedOut() or IsPauseMenuActive() then
-        shouldBeHidden = true
-      end
+        if IsScreenFadedOut() or IsPauseMenuActive() then
+          shouldBeHidden = true
+        end
 
-      if (shouldBeHidden and not chatHidden) or (not shouldBeHidden and chatHidden) then
-        chatHidden = shouldBeHidden
+        if (shouldBeHidden and not chatHidden) or (not shouldBeHidden and chatHidden) then
+          chatHidden = shouldBeHidden
 
-        SendNUIMessage({
-          type = 'ON_SCREEN_STATE_CHANGE',
-          shouldHide = shouldBeHidden
-        })
+          SendNUIMessage({
+            type = 'ON_SCREEN_STATE_CHANGE',
+            shouldHide = shouldBeHidden
+          })
+        end
       end
     end
   end
+end)
+
+RegisterNetEvent('chat:hideChat')
+AddEventHandler('chat:hideChat', function()
+  hideChat = true
+end)
+
+RegisterNetEvent('chat:showChat')
+AddEventHandler('chat:showChat', function()
+  hideChat = false
 end)
